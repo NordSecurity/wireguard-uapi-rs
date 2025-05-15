@@ -1,9 +1,8 @@
 use std::ops::{Deref, DerefMut};
 
-use zeroize::{Zeroize, ZeroizeOnDrop};
-
 /// Key material, public, private or preshared.
-#[derive(Clone, Debug, Default, PartialEq, Eq, Zeroize, ZeroizeOnDrop)]
+#[derive(Clone, Debug, Default, PartialEq, Eq)]
+#[cfg_attr(feature = "zeroize", derive(zeroize::Zeroize, zeroize::ZeroizeOnDrop))]
 pub struct Key([u8; 32]);
 
 impl Deref for Key {
@@ -27,9 +26,10 @@ impl AsRef<[u8]> for Key {
 }
 
 impl From<[u8; 32]> for Key {
-    fn from(mut value: [u8; 32]) -> Self {
+    fn from(#[allow(unused_mut)] mut value: [u8; 32]) -> Self {
         let ret = Self(value);
-        value.zeroize();
+        #[cfg(feature = "zeroize")]
+        zeroize::Zeroize::zeroize(&mut value);
         ret
     }
 }
