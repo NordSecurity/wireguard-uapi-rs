@@ -15,11 +15,7 @@ jobs:
     runs-on: ubuntu-24.04
     steps:
       - uses: actions/checkout@v2
-      - name: Annotate commit with clippy warnings
-        uses: actions-rs/clippy-check@v1
-        with:
-          token: ${{ secrets.GITHUB_TOKEN }}
-          args: --all-targets --all-features -- -D warnings
+      - run: cargo clippy --message-format=json --all-targets --all-features -- -D warnings
 
   rustfmt:
     runs-on: ubuntu-latest
