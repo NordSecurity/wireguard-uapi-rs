@@ -3,6 +3,7 @@ use crate::get;
 use crate::get::{DeviceBuilderError, ParseAllowedIpError, PeerBuilderError};
 use crate::key::Key;
 use crate::xplatform::protocol::{GetKey, ParseKeyError};
+use crate::xplatform::Cipher;
 use std::net::AddrParseError;
 use std::num::ParseIntError;
 use std::{str::FromStr, time::Duration};
@@ -212,7 +213,9 @@ fn process_line(
             | GetKey::TxBytes
             | GetKey::LastHandshakeTimeSec
             | GetKey::LastHandshakeTimeNsec
-            | GetKey::ProtocolVersion => Err(ParseErr::PeerLevelKeyBeforePublicKey(key)),
+            | GetKey::ProtocolVersion
+            | GetKey::SupportedCiphers
+            | GetKey::SelectedCipher => Err(ParseErr::PeerLevelKeyBeforePublicKey(key)),
 
             GetKey::Errno => match raw_val {
                 "0" => Ok(ParseState::InterfaceLevelKeys(device_builder)),
@@ -307,6 +310,23 @@ fn process_line(
                 state.peer_builder.protocol_version(protocol_version);
                 Ok(ParseState::PeerLevelKeys(state))
             }
+
+            GetKey::SupportedCiphers => {
+                let ciphers = raw_val
+                    .split(',')
+                    .filter_map(|s| s.trim().parse::<Cipher>().ok())
+                    .collect::<Vec<_>>();
+                state.peer_builder.supported_ciphers(Some(ciphers));
+                Ok(ParseState::PeerLevelKeys(state))
+            }
+            GetKey::SelectedCipher => {
+                // Silently ignore unknown cipher names.
+                if let Ok(cipher) = raw_val.trim().parse::<Cipher>() {
+                    state.peer_builder.selected_cipher(Some(cipher));
+                }
+                Ok(ParseState::PeerLevelKeys(state))
+            }
+
             GetKey::Errno => match raw_val {
                 "0" => Ok(ParseState::PeerLevelKeys(state)),
                 _ => Err(ParseErr::ServerError(raw_val.to_string())),
@@ -332,7 +352,7 @@ pub fn parse_device_key(mut buf: Vec<u8>) -> Option<Key> {
 #[cfg(test)]
 mod tests {
     use super::{parse, parse_device_key};
-    use crate::{get, key::Key};
+    use crate::{get, key::Key, xplatform::Cipher};
     use std::time::Duration;
 
     #[test]
@@ -350,6 +370,8 @@ mod tests {
             rx_bytes=696\n\
             persistent_keepalive_interval=110\n\
             allowed_ip=10.24.24.3/32\n\
+            supported_ciphers=chacha20poly1305,aegis256\n\
+            selected_cipher=chacha20poly1305\n\
             errno=0\n\
             \n";
         let expected = get::Device {
@@ -378,11 +400,45 @@ mod tests {
                     cidr_mask: 32,
                 }],
                 protocol_version: 1,
+                supported_ciphers: Some(vec![Cipher::Chacha20Poly1305, Cipher::Aegis256]),
+                selected_cipher: Some(Cipher::Chacha20Poly1305),
             }],
         };
 
         let actual = parse(response.lines().map(String::from).map(Ok))?;
         assert_eq!(actual, expected);
+
+        Ok(())
+    }
+
+    /// Unknown cipher names are silently dropped
+    #[test]
+    fn parse_skips_unknown_ciphers() -> anyhow::Result<()> {
+        let response = "\
+            private_key=18aa10c05a531f5c537a18426b376387fc2cbd701ae1b9b4271e327aaade9d4f\n\
+            listen_port=56137\n\
+            public_key=913ea0e20e28c12b5c5f5a858b93a05e686dc3ce524e16f3143bbb1023679751\n\
+            preshared_key=0000000000000000000000000000000000000000000000000000000000000000\n\
+            protocol_version=1\n\
+            supported_ciphers=chacha20poly1305,unknown,aegis256,aes128,aegis256x4\n\
+            selected_cipher=unknowncipher\n\
+            errno=0\n\
+            \n";
+
+        let actual = parse(response.lines().map(String::from).map(Ok))?;
+        let peer = &actual.peers[0];
+
+        // Only known ciphers are handled; unknown and aes128 are dropped.
+        assert_eq!(
+            peer.supported_ciphers,
+            Some(vec![
+                Cipher::Chacha20Poly1305,
+                Cipher::Aegis256,
+                Cipher::Aegis256x4,
+            ])
+        );
+        // Unknown selected_cipher becomes None.
+        assert_eq!(peer.selected_cipher, None);
 
         Ok(())
     }
@@ -470,6 +526,8 @@ mod tests {
                         cidr_mask: 32,
                     }],
                     protocol_version: 1,
+                    supported_ciphers: None,
+                    selected_cipher: None,
                 },
                 get::Peer {
                     public_key: parse_device_key(base64::decode(
@@ -488,6 +546,8 @@ mod tests {
                         cidr_mask: 32,
                     }],
                     protocol_version: 1,
+                    supported_ciphers: None,
+                    selected_cipher: None,
                 },
                 get::Peer {
                     public_key: parse_device_key(base64::decode(
@@ -513,6 +573,8 @@ mod tests {
                         },
                     ],
                     protocol_version: 1,
+                    supported_ciphers: None,
+                    selected_cipher: None,
                 },
             ],
         };

@@ -69,6 +69,10 @@ fn simple() -> anyhow::Result<()> {
                     },
                 ],
                 protocol_version: 1,
+                #[cfg(feature = "xplatform")]
+                supported_ciphers: None,
+                #[cfg(feature = "xplatform")]
+                selected_cipher: None,
             },
             get::Peer {
                 public_key: parse_device_key(&base64::decode(
@@ -88,6 +92,10 @@ fn simple() -> anyhow::Result<()> {
                     cidr_mask: 128,
                 }],
                 protocol_version: 1,
+                #[cfg(feature = "xplatform")]
+                supported_ciphers: None,
+                #[cfg(feature = "xplatform")]
+                selected_cipher: None,
             },
         ],
     };
@@ -190,6 +198,10 @@ fn large_peer() -> anyhow::Result<()> {
                 })
                 .collect(),
             protocol_version: 1,
+            #[cfg(feature = "xplatform")]
+            supported_ciphers: None,
+            #[cfg(feature = "xplatform")]
+            selected_cipher: None,
         }],
     };
 
