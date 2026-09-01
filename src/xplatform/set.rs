@@ -1,4 +1,5 @@
 use crate::key::Key;
+use crate::xplatform::cipher::Cipher;
 use crate::xplatform::protocol::SetKey;
 use std::fmt::Display;
 use std::net::IpAddr;
@@ -103,6 +104,11 @@ pub struct Peer {
     /// as part of a prior peer, the allowed IP entry will be removed from that
     /// peer and added to this peer.
     pub allowed_ips: Vec<AllowedIp>,
+
+    /// NepTUN only. List of supported AEAD cipher suites. Only
+    /// `chacha20poly1305`, `aegis256`, `aegis256x2`, and `aegis256x4` are
+    /// valid values.
+    pub supported_ciphers: Option<Vec<Cipher>>,
 }
 
 impl Peer {
@@ -116,6 +122,7 @@ impl Peer {
             persistent_keepalive_interval: None,
             replace_allowed_ips: None,
             allowed_ips: vec![],
+            supported_ciphers: None,
         }
     }
 
@@ -153,6 +160,11 @@ impl Peer {
         self.allowed_ips = allowed_ips;
         self
     }
+
+    pub fn supported_ciphers(mut self, supported_ciphers: Vec<Cipher>) -> Self {
+        self.supported_ciphers = Some(supported_ciphers);
+        self
+    }
 }
 
 impl Display for Peer {
@@ -182,6 +194,15 @@ impl Display for Peer {
 
         if let Some(replace_allowed_ips) = self.replace_allowed_ips {
             writeln!(f, "{}={}", SetKey::ReplaceAllowedIps, replace_allowed_ips)?;
+        }
+
+        if let Some(supported_ciphers) = &self.supported_ciphers {
+            let cipher_str = supported_ciphers
+                .iter()
+                .map(|c| c.to_string())
+                .collect::<Vec<_>>()
+                .join(",");
+            writeln!(f, "{}={}", SetKey::SupportedCiphers, cipher_str)?;
         }
 
         for allowed_ip in &self.allowed_ips {
@@ -349,6 +370,33 @@ mod tests {
                 cidr_mask: 32,
             }])
             .endpoint("[abcd:23::33%2]:51820".parse().unwrap())],
+            ..Default::default()
+        };
+        let actual = format!("{set_request}");
+
+        assert_eq!(expected, actual);
+    }
+
+    #[test]
+    fn serialize_supported_ciphers() {
+        let expected = [
+            "public_key=b85996fecc9c7f1fc6d2572a76eda11d59bcd20be8e543b15ce4bd85a8e75a33",
+            "supported_ciphers=chacha20poly1305,aegis256,aegis256x2",
+            "",
+        ]
+        .join("\n");
+
+        let set_request = Device {
+            peers: vec![Peer::from_public_key([
+                0xb8, 0x59, 0x96, 0xfe, 0xcc, 0x9c, 0x7f, 0x1f, 0xc6, 0xd2, 0x57, 0x2a, 0x76, 0xed,
+                0xa1, 0x1d, 0x59, 0xbc, 0xd2, 0x0b, 0xe8, 0xe5, 0x43, 0xb1, 0x5c, 0xe4, 0xbd, 0x85,
+                0xa8, 0xe7, 0x5a, 0x33,
+            ])
+            .supported_ciphers(vec![
+                Cipher::Chacha20Poly1305,
+                Cipher::Aegis256,
+                Cipher::Aegis256x2,
+            ])],
             ..Default::default()
         };
         let actual = format!("{set_request}");

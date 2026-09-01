@@ -18,11 +18,14 @@
 //! [wireguard.com/xplatform]: https://www.wireguard.com/xplatform
 //! [xplatform-interface]: https://www.wireguard.com/xplatform/#interface
 
+pub mod cipher;
 mod client;
 pub mod error;
 pub mod parser;
 mod protocol;
 pub mod set;
+
+pub use cipher::Cipher;
 
 #[cfg(unix)]
 pub use client::Client;
