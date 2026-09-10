@@ -4,6 +4,8 @@ use std::str::FromStr;
 use std::time::Duration;
 
 use crate::key::Key;
+#[cfg(feature = "xplatform")]
+use crate::xplatform::Cipher;
 
 #[derive(Builder, Debug, PartialEq, Eq)]
 pub struct Device {
@@ -35,6 +37,14 @@ pub struct Peer {
     #[builder(default, field(public))]
     pub allowed_ips: Vec<AllowedIp>,
     pub protocol_version: u32,
+    /// NepTUN only. List of supported AEAD cipher suites.
+    #[builder(default)]
+    #[cfg(feature = "xplatform")]
+    pub supported_ciphers: Option<Vec<Cipher>>,
+    /// NepTUN only. Read only parameter.
+    #[builder(default)]
+    #[cfg(feature = "xplatform")]
+    pub selected_cipher: Option<Cipher>,
 }
 
 #[derive(Builder, Clone, Debug, PartialEq, Eq)]

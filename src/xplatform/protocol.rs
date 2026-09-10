@@ -21,6 +21,8 @@ pub enum GetKey {
     LastHandshakeTimeSec,
     LastHandshakeTimeNsec,
     ProtocolVersion,
+    SupportedCiphers,
+    SelectedCipher,
     Errno,
 }
 
@@ -42,6 +44,8 @@ impl FromStr for GetKey {
             "last_handshake_time_sec" => Ok(Self::LastHandshakeTimeSec),
             "last_handshake_time_nsec" => Ok(Self::LastHandshakeTimeNsec),
             "protocol_version" => Ok(Self::ProtocolVersion),
+            "supported_ciphers" => Ok(Self::SupportedCiphers),
+            "selected_cipher" => Ok(Self::SelectedCipher),
             "errno" => Ok(Self::Errno),
             _ => Err(Self::Err {
                 unknown_key: s.to_string(),
@@ -66,6 +70,8 @@ impl Display for GetKey {
             GetKey::LastHandshakeTimeSec => f.write_str("last_handshake_time_sec"),
             GetKey::LastHandshakeTimeNsec => f.write_str("last_handshake_time_nsec"),
             GetKey::ProtocolVersion => f.write_str("protocol_version"),
+            GetKey::SupportedCiphers => f.write_str("supported_ciphers"),
+            GetKey::SelectedCipher => f.write_str("selected_cipher"),
             GetKey::Errno => f.write_str("errno"),
         }
     }
@@ -84,6 +90,7 @@ pub(crate) enum SetKey {
     PersistentKeepaliveInterval,
     ReplaceAllowedIps,
     AllowedIp,
+    SupportedCiphers,
 }
 
 impl From<&SetKey> for &'static str {
@@ -101,6 +108,7 @@ impl From<&SetKey> for &'static str {
             SetKey::PersistentKeepaliveInterval => "persistent_keepalive_interval",
             SetKey::ReplaceAllowedIps => "replace_allowed_ips",
             SetKey::AllowedIp => "allowed_ip",
+            SetKey::SupportedCiphers => "supported_ciphers",
         }
     }
 }
