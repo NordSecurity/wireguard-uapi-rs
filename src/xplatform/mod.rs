@@ -18,6 +18,7 @@
 //! [wireguard.com/xplatform]: https://www.wireguard.com/xplatform
 //! [xplatform-interface]: https://www.wireguard.com/xplatform/#interface
 
+#[cfg(feature = "neptun")]
 pub mod cipher;
 mod client;
 pub mod error;
@@ -25,6 +26,7 @@ pub mod parser;
 mod protocol;
 pub mod set;
 
+#[cfg(feature = "neptun")]
 pub use cipher::Cipher;
 
 #[cfg(unix)]

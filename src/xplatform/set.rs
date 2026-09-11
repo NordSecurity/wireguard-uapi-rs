@@ -1,4 +1,5 @@
 use crate::key::Key;
+#[cfg(feature = "neptun")]
 use crate::xplatform::cipher::Cipher;
 use crate::xplatform::protocol::SetKey;
 use std::fmt::Display;
@@ -105,6 +106,8 @@ pub struct Peer {
     /// peer and added to this peer.
     pub allowed_ips: Vec<AllowedIp>,
 
+    // NepTUN only
+    #[cfg(feature = "neptun")]
     /// NepTUN only. List of supported AEAD cipher suites. Only
     /// `chacha20poly1305`, `aegis256`, `aegis256x2`, and `aegis256x4` are
     /// valid values.
@@ -122,6 +125,7 @@ impl Peer {
             persistent_keepalive_interval: None,
             replace_allowed_ips: None,
             allowed_ips: vec![],
+            #[cfg(feature = "neptun")]
             supported_ciphers: None,
         }
     }
@@ -161,6 +165,7 @@ impl Peer {
         self
     }
 
+    #[cfg(feature = "neptun")]
     pub fn supported_ciphers(mut self, supported_ciphers: Vec<Cipher>) -> Self {
         self.supported_ciphers = Some(supported_ciphers);
         self
@@ -196,6 +201,7 @@ impl Display for Peer {
             writeln!(f, "{}={}", SetKey::ReplaceAllowedIps, replace_allowed_ips)?;
         }
 
+        #[cfg(feature = "neptun")]
         if let Some(supported_ciphers) = &self.supported_ciphers {
             let cipher_str = supported_ciphers
                 .iter()
@@ -378,6 +384,7 @@ mod tests {
     }
 
     #[test]
+    #[cfg(feature = "neptun")]
     fn serialize_supported_ciphers() {
         let expected = [
             "public_key=b85996fecc9c7f1fc6d2572a76eda11d59bcd20be8e543b15ce4bd85a8e75a33",

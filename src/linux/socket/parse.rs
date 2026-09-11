@@ -397,9 +397,9 @@ mod tests {
                         },
                     ],
                     protocol_version: 1,
-                    #[cfg(feature = "xplatform")]
+                    #[cfg(feature = "neptun")]
                     supported_ciphers: None,
-                    #[cfg(feature = "xplatform")]
+                    #[cfg(feature = "neptun")]
                     selected_cipher: None,
                 },
                 Peer {
@@ -425,9 +425,9 @@ mod tests {
                         },
                     ],
                     protocol_version: 1,
-                    #[cfg(feature = "xplatform")]
+                    #[cfg(feature = "neptun")]
                     supported_ciphers: None,
-                    #[cfg(feature = "xplatform")]
+                    #[cfg(feature = "neptun")]
                     selected_cipher: None,
                 },
             ],
@@ -814,9 +814,9 @@ mod tests {
                         })
                         .collect(),
                     protocol_version: 1,
-                    #[cfg(feature = "xplatform")]
+                    #[cfg(feature = "neptun")]
                     supported_ciphers: None,
-                    #[cfg(feature = "xplatform")]
+                    #[cfg(feature = "neptun")]
                     selected_cipher: None,
                 }]
             }

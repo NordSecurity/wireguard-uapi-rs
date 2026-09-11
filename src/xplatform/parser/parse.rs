@@ -3,6 +3,7 @@ use crate::get;
 use crate::get::{DeviceBuilderError, ParseAllowedIpError, PeerBuilderError};
 use crate::key::Key;
 use crate::xplatform::protocol::{GetKey, ParseKeyError};
+#[cfg(feature = "neptun")]
 use crate::xplatform::Cipher;
 use std::net::AddrParseError;
 use std::num::ParseIntError;
@@ -213,9 +214,12 @@ fn process_line(
             | GetKey::TxBytes
             | GetKey::LastHandshakeTimeSec
             | GetKey::LastHandshakeTimeNsec
-            | GetKey::ProtocolVersion
-            | GetKey::SupportedCiphers
-            | GetKey::SelectedCipher => Err(ParseErr::PeerLevelKeyBeforePublicKey(key)),
+            | GetKey::ProtocolVersion => Err(ParseErr::PeerLevelKeyBeforePublicKey(key)),
+
+            #[cfg(feature = "neptun")]
+            GetKey::SupportedCiphers | GetKey::SelectedCipher => {
+                Err(ParseErr::PeerLevelKeyBeforePublicKey(key))
+            }
 
             GetKey::Errno => match raw_val {
                 "0" => Ok(ParseState::InterfaceLevelKeys(device_builder)),
@@ -311,6 +315,7 @@ fn process_line(
                 Ok(ParseState::PeerLevelKeys(state))
             }
 
+            #[cfg(feature = "neptun")]
             GetKey::SupportedCiphers => {
                 let ciphers = raw_val
                     .split(',')
@@ -319,6 +324,7 @@ fn process_line(
                 state.peer_builder.supported_ciphers(Some(ciphers));
                 Ok(ParseState::PeerLevelKeys(state))
             }
+            #[cfg(feature = "neptun")]
             GetKey::SelectedCipher => {
                 // Silently ignore unknown cipher names.
                 if let Ok(cipher) = raw_val.trim().parse::<Cipher>() {
@@ -352,7 +358,9 @@ pub fn parse_device_key(mut buf: Vec<u8>) -> Option<Key> {
 #[cfg(test)]
 mod tests {
     use super::{parse, parse_device_key};
-    use crate::{get, key::Key, xplatform::Cipher};
+    #[cfg(feature = "neptun")]
+    use crate::xplatform::Cipher;
+    use crate::{get, key::Key};
     use std::time::Duration;
 
     #[test]
@@ -370,8 +378,6 @@ mod tests {
             rx_bytes=696\n\
             persistent_keepalive_interval=110\n\
             allowed_ip=10.24.24.3/32\n\
-            supported_ciphers=chacha20poly1305,aegis256\n\
-            selected_cipher=chacha20poly1305\n\
             errno=0\n\
             \n";
         let expected = get::Device {
@@ -400,8 +406,10 @@ mod tests {
                     cidr_mask: 32,
                 }],
                 protocol_version: 1,
-                supported_ciphers: Some(vec![Cipher::Chacha20Poly1305, Cipher::Aegis256]),
-                selected_cipher: Some(Cipher::Chacha20Poly1305),
+                #[cfg(feature = "neptun")]
+                supported_ciphers: None,
+                #[cfg(feature = "neptun")]
+                selected_cipher: None,
             }],
         };
 
@@ -413,7 +421,8 @@ mod tests {
 
     /// Unknown cipher names are silently dropped
     #[test]
-    fn parse_skips_unknown_ciphers() -> anyhow::Result<()> {
+    #[cfg(feature = "neptun")]
+    fn parse_known_ciphers() -> anyhow::Result<()> {
         let response = "\
             private_key=18aa10c05a531f5c537a18426b376387fc2cbd701ae1b9b4271e327aaade9d4f\n\
             listen_port=56137\n\
@@ -526,7 +535,9 @@ mod tests {
                         cidr_mask: 32,
                     }],
                     protocol_version: 1,
+                    #[cfg(feature = "neptun")]
                     supported_ciphers: None,
+                    #[cfg(feature = "neptun")]
                     selected_cipher: None,
                 },
                 get::Peer {
@@ -546,7 +557,9 @@ mod tests {
                         cidr_mask: 32,
                     }],
                     protocol_version: 1,
+                    #[cfg(feature = "neptun")]
                     supported_ciphers: None,
+                    #[cfg(feature = "neptun")]
                     selected_cipher: None,
                 },
                 get::Peer {
@@ -573,7 +586,9 @@ mod tests {
                         },
                     ],
                     protocol_version: 1,
+                    #[cfg(feature = "neptun")]
                     supported_ciphers: None,
+                    #[cfg(feature = "neptun")]
                     selected_cipher: None,
                 },
             ],

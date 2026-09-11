@@ -21,7 +21,9 @@ pub enum GetKey {
     LastHandshakeTimeSec,
     LastHandshakeTimeNsec,
     ProtocolVersion,
+    #[cfg(feature = "neptun")]
     SupportedCiphers,
+    #[cfg(feature = "neptun")]
     SelectedCipher,
     Errno,
 }
@@ -44,7 +46,9 @@ impl FromStr for GetKey {
             "last_handshake_time_sec" => Ok(Self::LastHandshakeTimeSec),
             "last_handshake_time_nsec" => Ok(Self::LastHandshakeTimeNsec),
             "protocol_version" => Ok(Self::ProtocolVersion),
+            #[cfg(feature = "neptun")]
             "supported_ciphers" => Ok(Self::SupportedCiphers),
+            #[cfg(feature = "neptun")]
             "selected_cipher" => Ok(Self::SelectedCipher),
             "errno" => Ok(Self::Errno),
             _ => Err(Self::Err {
@@ -70,7 +74,9 @@ impl Display for GetKey {
             GetKey::LastHandshakeTimeSec => f.write_str("last_handshake_time_sec"),
             GetKey::LastHandshakeTimeNsec => f.write_str("last_handshake_time_nsec"),
             GetKey::ProtocolVersion => f.write_str("protocol_version"),
+            #[cfg(feature = "neptun")]
             GetKey::SupportedCiphers => f.write_str("supported_ciphers"),
+            #[cfg(feature = "neptun")]
             GetKey::SelectedCipher => f.write_str("selected_cipher"),
             GetKey::Errno => f.write_str("errno"),
         }
@@ -90,6 +96,7 @@ pub(crate) enum SetKey {
     PersistentKeepaliveInterval,
     ReplaceAllowedIps,
     AllowedIp,
+    #[cfg(feature = "neptun")]
     SupportedCiphers,
 }
 
@@ -108,6 +115,7 @@ impl From<&SetKey> for &'static str {
             SetKey::PersistentKeepaliveInterval => "persistent_keepalive_interval",
             SetKey::ReplaceAllowedIps => "replace_allowed_ips",
             SetKey::AllowedIp => "allowed_ip",
+            #[cfg(feature = "neptun")]
             SetKey::SupportedCiphers => "supported_ciphers",
         }
     }

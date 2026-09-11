@@ -4,7 +4,7 @@ use std::str::FromStr;
 use std::time::Duration;
 
 use crate::key::Key;
-#[cfg(feature = "xplatform")]
+#[cfg(feature = "neptun")]
 use crate::xplatform::Cipher;
 
 #[derive(Builder, Debug, PartialEq, Eq)]
@@ -40,11 +40,11 @@ pub struct Peer {
     /// NepTUN only. List of supported AEAD cipher suites. Unknown cipher
     /// names received from the wire are silently discarded.
     #[builder(default)]
-    #[cfg(feature = "xplatform")]
+    #[cfg(feature = "neptun")]
     pub supported_ciphers: Option<Vec<Cipher>>,
     /// NepTUN only. Read only parameter.
     #[builder(default)]
-    #[cfg(feature = "xplatform")]
+    #[cfg(feature = "neptun")]
     pub selected_cipher: Option<Cipher>,
 }
 
