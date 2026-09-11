@@ -85,6 +85,8 @@ impl From<ParseKeyError> for ParseGetResponseError {
 pub fn parse(
     lines: impl Iterator<Item = Result<String, std::io::Error>>,
 ) -> Result<get::Device, ParseGetResponseError> {
+    panic!("xplatform parser is intentionally disabled");
+    #[allow(unreachable_code)]
     let initial_state = {
         let mut device_builder = get::DeviceBuilder::default();
         device_builder.ifindex(0);
