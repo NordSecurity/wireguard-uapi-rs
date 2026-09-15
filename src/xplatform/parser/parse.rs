@@ -378,6 +378,10 @@ mod tests {
                     cidr_mask: 32,
                 }],
                 protocol_version: 1,
+                #[cfg(feature = "neptun")]
+                supported_ciphers: None,
+                #[cfg(feature = "neptun")]
+                selected_cipher: None,
             }],
         };
 
@@ -470,6 +474,10 @@ mod tests {
                         cidr_mask: 32,
                     }],
                     protocol_version: 1,
+                    #[cfg(feature = "neptun")]
+                    supported_ciphers: None,
+                    #[cfg(feature = "neptun")]
+                    selected_cipher: None,
                 },
                 get::Peer {
                     public_key: parse_device_key(base64::decode(
@@ -488,6 +496,10 @@ mod tests {
                         cidr_mask: 32,
                     }],
                     protocol_version: 1,
+                    #[cfg(feature = "neptun")]
+                    supported_ciphers: None,
+                    #[cfg(feature = "neptun")]
+                    selected_cipher: None,
                 },
                 get::Peer {
                     public_key: parse_device_key(base64::decode(
@@ -513,6 +525,10 @@ mod tests {
                         },
                     ],
                     protocol_version: 1,
+                    #[cfg(feature = "neptun")]
+                    supported_ciphers: None,
+                    #[cfg(feature = "neptun")]
+                    selected_cipher: None,
                 },
             ],
         };

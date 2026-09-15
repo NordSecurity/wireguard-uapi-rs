@@ -20,7 +20,8 @@ required-features = ["xplatform"]
 
 [features]
 default = []
-xplatform = ["hex", "take-until"]
+xplatform = ["hex", "take-until", "zeroize"]
+neptun = ["xplatform"]
 
 [dependencies]
 derive_builder = "0.10.2"
