@@ -1,4 +1,6 @@
 use crate::key::Key;
+#[cfg(feature = "neptun")]
+use crate::xplatform::cipher::Cipher;
 use crate::xplatform::protocol::SetKey;
 use std::fmt::Display;
 use std::net::IpAddr;
@@ -103,6 +105,10 @@ pub struct Peer {
     /// as part of a prior peer, the allowed IP entry will be removed from that
     /// peer and added to this peer.
     pub allowed_ips: Vec<AllowedIp>,
+
+    #[cfg(feature = "neptun")]
+    /// NepTUN only. List of supported AEAD cipher suites.
+    pub supported_ciphers: Option<Vec<Cipher>>,
 }
 
 impl Peer {
@@ -116,6 +122,8 @@ impl Peer {
             persistent_keepalive_interval: None,
             replace_allowed_ips: None,
             allowed_ips: vec![],
+            #[cfg(feature = "neptun")]
+            supported_ciphers: None,
         }
     }
 
