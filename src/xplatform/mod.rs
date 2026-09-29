@@ -18,11 +18,16 @@
 //! [wireguard.com/xplatform]: https://www.wireguard.com/xplatform
 //! [xplatform-interface]: https://www.wireguard.com/xplatform/#interface
 
+#[cfg(feature = "ciphers_extension")]
+pub mod cipher;
 mod client;
 pub mod error;
 pub mod parser;
 mod protocol;
 pub mod set;
+
+#[cfg(feature = "ciphers_extension")]
+pub use cipher::{Cipher, UnknownCipher};
 
 #[cfg(unix)]
 pub use client::Client;
