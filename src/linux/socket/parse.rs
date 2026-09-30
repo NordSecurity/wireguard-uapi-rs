@@ -397,10 +397,6 @@ mod tests {
                         },
                     ],
                     protocol_version: 1,
-                    #[cfg(feature = "ciphers_extension")]
-                    supported_ciphers: None,
-                    #[cfg(feature = "ciphers_extension")]
-                    selected_cipher: None,
                 },
                 Peer {
                     public_key: parse_device_key(&base64::decode(
@@ -425,10 +421,6 @@ mod tests {
                         },
                     ],
                     protocol_version: 1,
-                    #[cfg(feature = "ciphers_extension")]
-                    supported_ciphers: None,
-                    #[cfg(feature = "ciphers_extension")]
-                    selected_cipher: None,
                 },
             ],
         })
@@ -814,10 +806,6 @@ mod tests {
                         })
                         .collect(),
                     protocol_version: 1,
-                    #[cfg(feature = "ciphers_extension")]
-                    supported_ciphers: None,
-                    #[cfg(feature = "ciphers_extension")]
-                    selected_cipher: None,
                 }]
             }
         );
