@@ -84,6 +84,8 @@ pub(crate) enum SetKey {
     PersistentKeepaliveInterval,
     ReplaceAllowedIps,
     AllowedIp,
+    #[cfg(feature = "ciphers_extension")]
+    SupportedCiphers,
 }
 
 impl From<&SetKey> for &'static str {
@@ -101,6 +103,8 @@ impl From<&SetKey> for &'static str {
             SetKey::PersistentKeepaliveInterval => "persistent_keepalive_interval",
             SetKey::ReplaceAllowedIps => "replace_allowed_ips",
             SetKey::AllowedIp => "allowed_ip",
+            #[cfg(feature = "ciphers_extension")]
+            SetKey::SupportedCiphers => "supported_ciphers",
         }
     }
 }

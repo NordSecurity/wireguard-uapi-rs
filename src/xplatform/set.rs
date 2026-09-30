@@ -196,6 +196,18 @@ impl Display for Peer {
             allowed_ip.fmt(f)?;
         }
 
+        #[cfg(feature = "ciphers_extension")]
+        if let Some(ciphers) = &self.supported_ciphers {
+            if !ciphers.is_empty() {
+                let joined = ciphers
+                    .iter()
+                    .map(|c| c.to_string())
+                    .collect::<Vec<_>>()
+                    .join(",");
+                writeln!(f, "{}={}", SetKey::SupportedCiphers, joined)?;
+            }
+        }
+
         Ok(())
     }
 }
@@ -395,5 +407,48 @@ mod tests {
         };
         assert_eq!(allowed_ip1, allowed_ip2);
         let _ = format!("{allowed_ip1:?}");
+    }
+
+    #[cfg(feature = "ciphers_extension")]
+    #[test]
+    fn serialize_supported_ciphers() {
+        use crate::xplatform::cipher::Cipher;
+
+        let peer = Peer {
+            supported_ciphers: Some(vec![Cipher::Chacha20Poly1305, Cipher::Aegis256]),
+            ..Peer::from_public_key([0u8; 32])
+        };
+        let output = format!("{peer}");
+        assert!(
+            output.contains("supported_ciphers=chacha20poly1305,aegis256"),
+            "unexpected output:\n{}",
+            output
+        );
+    }
+
+    #[cfg(feature = "ciphers_extension")]
+    #[test]
+    fn serialize_supported_ciphers_empty_omitted() {
+        use crate::xplatform::cipher::Cipher;
+
+        // Empty Vec should produce no supported_ciphers line.
+        let peer_empty = Peer {
+            supported_ciphers: Some(vec![]),
+            ..Peer::from_public_key([0u8; 32])
+        };
+        assert!(
+            !format!("{peer_empty}").contains("supported_ciphers"),
+            "empty supported_ciphers should be omitted"
+        );
+
+        // None should produce no supported_ciphers line.
+        let peer_none = Peer {
+            supported_ciphers: None,
+            ..Peer::from_public_key([0u8; 32])
+        };
+        assert!(
+            !format!("{peer_none}").contains("supported_ciphers"),
+            "None supported_ciphers should be omitted"
+        );
     }
 }
