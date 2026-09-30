@@ -378,10 +378,6 @@ mod tests {
                     cidr_mask: 32,
                 }],
                 protocol_version: 1,
-                #[cfg(feature = "ciphers_extension")]
-                supported_ciphers: None,
-                #[cfg(feature = "ciphers_extension")]
-                selected_cipher: None,
             }],
         };
 
@@ -474,10 +470,6 @@ mod tests {
                         cidr_mask: 32,
                     }],
                     protocol_version: 1,
-                    #[cfg(feature = "ciphers_extension")]
-                    supported_ciphers: None,
-                    #[cfg(feature = "ciphers_extension")]
-                    selected_cipher: None,
                 },
                 get::Peer {
                     public_key: parse_device_key(base64::decode(
@@ -496,10 +488,6 @@ mod tests {
                         cidr_mask: 32,
                     }],
                     protocol_version: 1,
-                    #[cfg(feature = "ciphers_extension")]
-                    supported_ciphers: None,
-                    #[cfg(feature = "ciphers_extension")]
-                    selected_cipher: None,
                 },
                 get::Peer {
                     public_key: parse_device_key(base64::decode(
@@ -525,10 +513,6 @@ mod tests {
                         },
                     ],
                     protocol_version: 1,
-                    #[cfg(feature = "ciphers_extension")]
-                    supported_ciphers: None,
-                    #[cfg(feature = "ciphers_extension")]
-                    selected_cipher: None,
                 },
             ],
         };
