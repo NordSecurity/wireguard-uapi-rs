@@ -420,7 +420,7 @@ mod tests {
         };
         let output = format!("{peer}");
         assert!(
-            output.contains("supported_ciphers=chacha20poly1305,aegis256"),
+            output.contains("supported_ciphers=AEAD_CHACHA20_POLY1305,AEAD_AEGIS256"),
             "unexpected output:\n{}",
             output
         );
